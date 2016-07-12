@@ -26,6 +26,7 @@
 #include "linops/someops.h"
 #include "linops/grad.h"
 #include "linops/sum.h"
+#include "linops/waveop.h"
 
 #include "wavelet2/wavelet.h"
 #include "wavelet3/wavthresh.h"
@@ -40,6 +41,9 @@
 #include "optreg.h"
 
 
+#ifndef CFL_SIZE
+#define CFL_SIZE sizeof(complex float)
+#endif
 
 
 void help_reg(void)
@@ -235,30 +239,48 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 			case L1WAV:
 				debug_printf(DP_INFO, "l1-wavelet regularization: %f\n", regs[nr].lambda);
 
-				if (0 != regs[nr].jflags)
-					debug_printf(DP_WARN, "joint l1-wavelet thresholding not currently supported.\n");
+#if 1
+				long minsize[DIMS] = { [0 ... DIMS - 1] = 1 };
+				unsigned int wflags = 0;
+
+				for (unsigned int i = 0; i < DIMS; i++) {
+
+					if ((1 < img_dims[i]) && MD_IS_SET(regs[nr].xflags, i)) {
+
+						wflags = MD_SET(wflags, i);
+						minsize[i] = MIN(img_dims[i], 16);
+					}
+				}
+
+#else
 
 				long minsize[DIMS] = { [0 ... DIMS - 1] = 1 };
 				minsize[0] = MIN(img_dims[0], 16);
 				minsize[1] = MIN(img_dims[1], 16);
 				minsize[2] = MIN(img_dims[2], 16);
+#endif
+				debug_print_dims(DP_INFO, DIMS, minsize);
 
-				if (7 == regs[nr].xflags) {
+				if (0 != regs[nr].jflags) {
+
+					if (7 == regs[nr].xflags)
+						trafos[nr] = wavelet_create(DIMS, img_dims, FFT_FLAGS, minsize, randshift, use_gpu);
+					else {
+
+						long img_strs[DIMS];
+						md_calc_strides(DIMS, img_strs, img_dims, CFL_SIZE);
+						trafos[nr] = wavelet3_create(DIMS, wflags, img_dims, img_strs, minsize);
+					}
+
+					prox_ops[nr] = prox_unithresh_create(DIMS, trafos[nr], regs[nr].lambda, regs[nr].jflags, use_gpu);
+				}
+				else if (7 == regs[nr].xflags) {
 
 					trafos[nr] = linop_identity_create(DIMS, img_dims);
 					prox_ops[nr] = prox_wavethresh_create(DIMS, img_dims, FFT_FLAGS, minsize, regs[nr].lambda, randshift, use_gpu);
 
 				} else {
 
-					unsigned int wflags = 0;
-					for (unsigned int i = 0; i < DIMS; i++) {
-
-						if ((1 < img_dims[i]) && MD_IS_SET(regs[nr].xflags, i)) {
-
-							wflags = MD_SET(wflags, i);
-							minsize[i] = MIN(img_dims[i], 16);
-						}
-					}
 
 					trafos[nr] = linop_identity_create(DIMS, img_dims);
 					prox_ops[nr] = prox_wavelet3_thresh_create(DIMS, img_dims, wflags, minsize, regs[nr].lambda, randshift);
