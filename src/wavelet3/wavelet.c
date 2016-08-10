@@ -509,7 +509,10 @@ static void wavelet3_softthresh(unsigned int N, float lambda, unsigned int flags
 	if (0 == flags) {
 
 		assert(offset == coeffs0);
-		md_zsoftthresh(2 * N, wdims, lambda, jflags, out, in);
+		assert(1 == bands);
+
+		// process coarse coefficents
+		md_zsoftthresh(N, wdims, lambda, jflags, out, in);
 
 	} else {
 
@@ -517,7 +520,10 @@ static void wavelet3_softthresh(unsigned int N, float lambda, unsigned int flags
 		md_copy_dims(N, vdims, wdims);
 		vdims[N] = bands - 1;
 
+		// process high-pass bands
 		md_zsoftthresh(N + 1, vdims, lambda, jflags, out + offset, in + offset);
+
+		// recursive into low-pass band
 		wavelet3_softthresh(N, lambda, wavelet_filter_flags(N, flags, wdims, minsize), jflags, wdims, minsize, flen, out, in);
 	}
 }
