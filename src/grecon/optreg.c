@@ -240,9 +240,6 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 			case L1WAV:
 				debug_printf(DP_INFO, "l1-wavelet regularization: %f\n", regs[nr].lambda);
 
-				if (0 != regs[nr].jflags)
-					debug_printf(DP_WARN, "joint l1-wavelet thresholding not currently supported.\n");
-
 				long minsize[DIMS] = { [0 ... DIMS - 1] = 1 };
 				minsize[0] = MIN(img_dims[0], 16);
 				minsize[1] = MIN(img_dims[1], 16);

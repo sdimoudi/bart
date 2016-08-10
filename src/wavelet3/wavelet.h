@@ -33,5 +33,6 @@ extern long wavelet_coeffs(unsigned int N, unsigned int flags, const long dims[N
 
 
 extern void wavelet3_thresh(unsigned int N, float lambda, unsigned int flags, const long shifts[N], const long dims[N], complex float* out, const complex float* in, const long minsize[N], long flen, const float filter[2][2][flen]);
+extern void wavelet3_thresh_joint(unsigned int N, float lambda, unsigned int flags, unsigned int jflags, const long shifts[N], const long dims[N], complex float* out, const complex float* in, const long minsize[N], long flen, const float filter[2][2][flen]);
 
 

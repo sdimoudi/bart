@@ -411,7 +411,7 @@ static double bench_wavelet_thresh(int version, long scale)
 		p = prox_wavethresh_create(DIMS, dims, 7, minsize, 1.1, true, false);
 		break;
 	case 3:
-		p = prox_wavelet3_thresh_create(DIMS, dims, 6, minsize, 1.1, true);
+		p = prox_wavelet3_thresh_create(DIMS, dims, 6, 0u, minsize, 1.1, true);
 		break;
 	default:
 		assert(0);

@@ -521,6 +521,7 @@ int main_sqpics(int argc, char* argv[])
 					wflags = MD_SET(wflags, i);
 					minsize[i] = MIN(img_dims[i], 16);
 				}
+
 			}
 
 			trafos[nr] = linop_identity_create(DIMS, img_dims);

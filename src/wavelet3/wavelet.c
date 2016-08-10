@@ -1,10 +1,11 @@
 /* Copyright 2014. The Regents of the University of California.
+ * Copyright 2016. Martin Uecker.
  * All rights reserved. Use of this source code is governed by
  * a BSD-style license which can be found in the LICENSE file.
  *
  * Authors:
  * 2013 Frank Ong <uecker@eecs.berkeley.edu>
- * 2013-2014 Martin Uecker <uecker@eecs.berkeley.edu>
+ * 2013-2016 Martin Uecker <martin.uecker@med.uni-goettingen.de>
  */
 
 /*
@@ -487,6 +488,52 @@ void wavelet3_thresh(unsigned int N, float lambda, unsigned int flags, const lon
 
 	fwt(N, flags, shifts, dims, tmp, istr, in, minsize, flen, filter);
 	md_zsoftthresh(1, MD_DIMS(coeffs), lambda, 0u, tmp, tmp);
+	iwt(N, flags, shifts, dims, istr, out, tmp, minsize, flen, filter);
+
+	md_free(tmp);
+}
+
+
+static void wavelet3_softthresh(unsigned int N, float lambda, unsigned int flags, unsigned int jflags, const long dims[N], const long minsize[N], long flen, complex float* out, const complex float* in)
+{
+	unsigned long coeffs = wavelet_coeffs(N, flags, dims, minsize, flen);
+
+	long wdims[2 * N];
+	wavelet_dims(N, flags, wdims, dims, flen);
+
+	long coeffs0 = md_calc_size(N, wdims);
+	long bands = md_calc_size(N, wdims + N);
+
+	long offset = coeffs - coeffs0 * (bands - 1);
+
+	if (0 == flags) {
+
+		assert(offset == coeffs0);
+		md_zsoftthresh(2 * N, wdims, lambda, jflags, out, in);
+
+	} else {
+
+		long vdims[N + 1];
+		md_copy_dims(N, vdims, wdims);
+		vdims[N] = bands - 1;
+
+		md_zsoftthresh(N + 1, vdims, lambda, jflags, out + offset, in + offset);
+		wavelet3_softthresh(N, lambda, wavelet_filter_flags(N, flags, wdims, minsize), jflags, wdims, minsize, flen, out, in);
+	}
+}
+
+
+void wavelet3_thresh_joint(unsigned int N, float lambda, unsigned int flags, unsigned int jflags, const long shifts[N], const long dims[N], complex float* out, const complex float* in, const long minsize[N], long flen, const float filter[2][2][flen])
+{
+	unsigned long coeffs = wavelet_coeffs(N, flags, dims, minsize, flen);
+
+	long istr[N];
+	md_calc_strides(N, istr, dims, CFL_SIZE);
+
+	complex float* tmp = md_alloc_sameplace(1, MD_DIMS(coeffs), CFL_SIZE, out);
+
+	fwt(N, flags, shifts, dims, tmp, istr, in, minsize, flen, filter);
+	wavelet3_softthresh(N, lambda, flags, jflags, dims, minsize, flen, tmp, tmp);
 	iwt(N, flags, shifts, dims, istr, out, tmp, minsize, flen, filter);
 
 	md_free(tmp);

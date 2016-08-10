@@ -33,6 +33,7 @@ struct wavelet3_thresh_s {
 	const long* dims;
 	const long* minsize;
 	unsigned int flags;
+	unsigned int jflags;
 	float lambda;
 	bool randshift;
 	int rand_state;
@@ -72,16 +73,17 @@ static void wavelet3_thresh_apply(const operator_data_t* _data, float mu, comple
 				shift[i] = rand_lim((unsigned int*)&data->rand_state, 1 << levels);
 	}
 
-	wavelet3_thresh(data->N, data->lambda * mu, data->flags, shift, data->dims,
-		out, in, data->minsize, 4, wavelet3_dau2);
+	wavelet3_thresh_joint(data->N, data->lambda * mu, data->flags, data->jflags, shift,
+		data->dims, out, in, data->minsize, 4, wavelet3_dau2);
 }
 
 static void wavelet3_thresh_del(const operator_data_t* _data)
 {
 	const struct wavelet3_thresh_s* data = CAST_DOWN(wavelet3_thresh_s, _data);
-	free((void*)data->dims);
-	free((void*)data->minsize);
-	free((void*)data);
+
+	xfree(data->dims);
+	xfree(data->minsize);
+	xfree(data);
 }
 
 
@@ -91,11 +93,12 @@ static void wavelet3_thresh_del(const operator_data_t* _data)
  * @param N number of dimensions
  * @param dims dimensions of x
  * @param flags bitmask for Wavelet transform
+ * @param jflags bitmask for joint thresholding
  * @param minsize minimium size of coarse Wavelet scale
  * @param lambda threshold parameter
  * @param randshift random shifting
  */
-const struct operator_p_s* prox_wavelet3_thresh_create(unsigned int N, const long dims[N], unsigned int flags, const long minsize[N], float lambda, bool randshift)
+const struct operator_p_s* prox_wavelet3_thresh_create(unsigned int N, const long dims[N], unsigned int flags, unsigned int jflags, const long minsize[N], float lambda, bool randshift)
 {
 	PTR_ALLOC(struct wavelet3_thresh_s, data);
 	SET_TYPEID(wavelet3_thresh_s, data);
@@ -111,6 +114,7 @@ const struct operator_p_s* prox_wavelet3_thresh_create(unsigned int N, const lon
 	data->minsize = *nminsize;
 
 	data->flags = flags;
+	data->jflags = jflags;
 	data->lambda = lambda;
 	data->randshift = randshift;
 	data->rand_state = 1;
