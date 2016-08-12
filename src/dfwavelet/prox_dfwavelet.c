@@ -22,15 +22,20 @@
 
 #include "num/multind.h"
 #include "num/flpmath.h"
+#include "num/ops.h"
+
 #include "misc/misc.h"
 #include "misc/debug.h"
-#include "num/ops.h"
 #include "misc/mri.h"
-#include "wavelet2/wavelet.h"
+
+#include "wavelet3/wavthresh.h"
+
 #include "linops/linop.h"
+
 #include "iter/thresh.h"
 
-#include "dfwavelet.h"
+#include "dfwavelet/dfwavelet.h"
+
 #include "prox_dfwavelet.h"
 
 
@@ -208,7 +213,6 @@ struct prox_4pt_dfwavelet_data {
         complex float* pc3;
 
         struct dfwavelet_plan_s* plan;
-        const struct linop_s* w_op;
         const struct operator_p_s* wthresh_op;
 };
 
@@ -266,9 +270,8 @@ struct prox_4pt_dfwavelet_data* prepare_prox_4pt_dfwavelet_data(const long im_di
         data->lambda = lambda;
 
         data->plan = prepare_dfwavelet_plan(3, data->tim_dims, (long*) min_size, (complex float*) res, use_gpu);
-        
-	data->w_op = wavelet_create(DIMS, data->tim_dims, FFT_FLAGS, min_size, true, use_gpu);
-        data->wthresh_op = prox_unithresh_create(DIMS, data->w_op, lambda, MD_BIT(data->flow_dim), use_gpu);
+
+        data->wthresh_op = prox_wavelet3_thresh_create(DIMS, data->tim_dims, FFT_FLAGS, MD_BIT(data->flow_dim), min_size, lambda, true);
 
         return PTR_PASS(data);
 }
@@ -289,7 +292,6 @@ static void prox_4pt_dfwavelet_del(const operator_data_t* _data)
 
         dfwavelet_free(data->plan);
 	operator_p_free(data->wthresh_op);
-	linop_free(data->w_op);
 
         free(data);
 }

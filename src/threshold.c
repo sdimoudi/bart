@@ -23,20 +23,20 @@
 #include "misc/misc.h"
 #include "misc/opts.h"
 
+#include "wavelet3/wavthresh.h"
+
 #include "lowrank/lrthresh.h"
 
 #include "linops/waveop.h"
 
 #include "dfwavelet/prox_dfwavelet.h"
 
-// FIXME: lowrank interface should not be coupled to mri.h -- it should take D as an input
 #ifndef DIMS
 #define DIMS 16
 #endif
 
 
 
-// FIXME: consider moving this to a more accessible location?
 static void wthresh(unsigned int D, const long dims[D], float lambda, unsigned int flags, complex float* out, const complex float* in)
 {
 	long minsize[D];
@@ -45,11 +45,7 @@ static void wthresh(unsigned int D, const long dims[D], float lambda, unsigned i
 	long course_scale[3] = MD_INIT_ARRAY(3, 16);
 	md_min_dims(3, ~0u, minsize, dims, course_scale);
 
-	long strs[D];
-	md_calc_strides(D, strs, dims, CFL_SIZE);
-
-	const struct linop_s* w = linop_wavelet3_create(D, 7, dims, strs, minsize);
-	const struct operator_p_s* p = prox_unithresh_create(D, w, lambda, flags, false);
+	const struct operator_p_s* p = prox_wavelet3_thresh_create(D, dims, FFT_FLAGS, flags, minsize, lambda, false);
 
 	operator_p_apply(p, 1., D, dims, out, D, dims, in);
 

@@ -1,10 +1,10 @@
 /* Copyright 2013-2015. The Regents of the University of California.
- * Copyright 2015. Martin Uecker.
+ * Copyright 2015-2016. Martin Uecker.
  * All rights reserved. Use of this source code is governed by
  * a BSD-style license which can be found in the LICENSE file.
  *
  * Authors:
- * 2012-2015 Martin Uecker <martin.uecker@med.uni-goettingen.de>
+ * 2012-2016 Martin Uecker <martin.uecker@med.uni-goettingen.de>
  * 2014-2016 Frank Ong <frankong@berkeley.edu>
  * 2014-2015 Jonathan Tamir <jtamir@eecs.berkeley.edu>
  *
@@ -512,8 +512,8 @@ int main_sqpics(int argc, char* argv[])
 			minsize[1] = MIN(img_dims[1], 16);
 			minsize[2] = MIN(img_dims[2], 16);
 
-			unsigned int wflags = 0;
 
+			unsigned int wflags = 0;
 			for (unsigned int i = 0; i < DIMS; i++) {
 
 				if ((1 < img_dims[i]) && MD_IS_SET(regs[nr].xflags, i)) {
@@ -521,11 +521,11 @@ int main_sqpics(int argc, char* argv[])
 					wflags = MD_SET(wflags, i);
 					minsize[i] = MIN(img_dims[i], 16);
 				}
-
 			}
 
 			trafos[nr] = linop_identity_create(DIMS, img_dims);
-			thresh_ops[nr] = prox_wavelet3_thresh_create(DIMS, img_dims, wflags, minsize, regs[nr].lambda, randshift);
+			thresh_ops[nr] = prox_wavelet3_thresh_create(DIMS, img_dims, wflags, 0u, minsize, regs[nr].lambda, randshift);
+
 			break;
 
 		case TV:

@@ -245,7 +245,6 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 				minsize[1] = MIN(img_dims[1], 16);
 				minsize[2] = MIN(img_dims[2], 16);
 
-
 				unsigned int wflags = 0;
 				for (unsigned int i = 0; i < DIMS; i++) {
 
@@ -257,7 +256,7 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 				}
 
 				trafos[nr] = linop_identity_create(DIMS, img_dims);
-				prox_ops[nr] = prox_wavelet3_thresh_create(DIMS, img_dims, wflags, minsize, regs[nr].lambda, randshift);
+				prox_ops[nr] = prox_wavelet3_thresh_create(DIMS, img_dims, wflags, regs[nr].jflags, minsize, regs[nr].lambda, randshift);
 				break;
 
 			case TV:
