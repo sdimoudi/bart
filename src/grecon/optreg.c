@@ -306,10 +306,10 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 		case NIHTWAV:
 		{
 			debug_printf(DP_INFO, "NIHT with wavelets regularization: k = %d%% of total elements in each wavelet transform\n", regs[nr].k);
-			if (use_gpu){
-				debug_printf(DP_WARN, "GPU operation is not currently implemented for NIHT.\nContinuing with CPU.\n");
-				use_gpu = false; // not implemented, TODO: implement NIHT with gpu
-			}
+			/* if (use_gpu){ */
+			/* 	debug_printf(DP_WARN, "GPU operation is not currently implemented for NIHT.\nContinuing with CPU.\n"); */
+			/* 	use_gpu = false; // not implemented, TODO: implement NIHT with gpu */
+			/* } */
 
 			long img_strs[N];
 			md_calc_strides(N, img_strs, img_dims, CFL_SIZE);

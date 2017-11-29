@@ -125,6 +125,7 @@ const struct operator_s* sense_recon_create(const struct sense_conf* conf, const
 		  const struct operator_s* precond_op)
 {
 	struct lsqr_conf lsqr_conf = { conf->cclambda, conf->gpu };
+//	debug_printf(DP_DEBUG1,"\nconf->gpu = %d\n", conf->gpu);
 
 	const struct operator_s* op = NULL;
 

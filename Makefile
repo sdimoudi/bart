@@ -258,7 +258,9 @@ endif
 GPUARCH_FLAGS ?= 
 NVCCFLAGS = -DUSE_CUDA -Xcompiler -fPIC -Xcompiler -fopenmp -O3 $(GPUARCH_FLAGS) -I$(srcdir)/ -m64 -ccbin $(CC)
 #NVCCFLAGS = -Xcompiler -fPIC -Xcompiler -fopenmp -O3  -I$(srcdir)/
-
+ifeq ($(DEBUG),1)
+NVCCFLAGS += -G -lineinfo
+endif
 
 %.o: %.cu
 	$(NVCC) $(NVCCFLAGS) -c $^ -o $@

@@ -45,6 +45,8 @@ extern void cuda_le(long N, float* dst, const float* src1, const float* src2);
 extern void cuda_zfftmod(long N, _Complex float* dst, const _Complex float* src, unsigned int n, _Bool inv, double phase);
 extern void cuda_max(long N, float* dst, const float* src1, const float* src2);
 extern void cuda_min(long N, float* dst, const float* src1, const float* src2);
+extern void cuda_zhardthresh(long N,  unsigned int k, _Complex float* d, const _Complex float* x);
+extern void cuda_zhardthresh_mask(long N,  unsigned int k, _Complex float* d, const _Complex float* x);
 
 #ifdef __cplusplus
 }

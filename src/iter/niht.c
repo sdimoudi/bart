@@ -36,7 +36,8 @@
 
 #include "niht.h"
 
- 
+#include <cuda_runtime.h>
+
 static void niht_imdom(const struct niht_conf_s* conf,  const struct vec_iter_s* vops,
 	  struct iter_op_s op, struct iter_op_p_s thresh,
 	  float* x, const float* b,
@@ -145,6 +146,12 @@ void niht(const struct niht_conf_s* conf, const struct niht_transop* trans,
 	  float* x, const float* b,
 	  struct iter_monitor_s* monitor)
 {
+	size_t freemem, totalmem;
+	cudaMemGetInfo( &freemem, &totalmem) ;
+	float freemb = freemem / 1024. / 1024.;
+	float totalmb = totalmem / 1024. / 1024.;
+	float ocmb = totalmb - freemb;
+	debug_printf(DP_INFO, "\nNIHT: GPU memory total: %f MB, occupied: %f MB, free: %f MB\n", totalmb,ocmb,freemb);
 	if (0 == conf->trans){ // do NIHT in image domain
 		niht_imdom(conf, vops, op, thresh, x, b, monitor);
 		return;

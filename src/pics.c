@@ -622,7 +622,7 @@ int main_pics(int argc, char* argv[])
 			italgo = iter2_niht;
 			iconf = CAST_UP(&ihconf);
 
-			conf.gpu = false; // gpu not implemented, disable
+			//conf.gpu = false; // gpu not implemented, disable
 
 			break;		
 

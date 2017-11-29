@@ -619,7 +619,7 @@ const struct vec_iter_s cpu_iter_ops = {
 	.add = add,
 	.sub = sub,
 	.swap = swap,
-	.zmul = zmul
+	.zmul = zmul,
 };
 
 

@@ -359,7 +359,8 @@ const struct vec_ops gpu_ops = {
 	.zsoftthresh_half = cuda_zsoftthresh_half,
 	.softthresh = cuda_softthresh,
 	.softthresh_half = cuda_softthresh_half,
-	.zhardthresh = NULL,
+	.zhardthresh = cuda_zhardthresh,
+	.zhardthresh_mask = cuda_zhardthresh_mask,
 };
 
 
@@ -382,6 +383,7 @@ struct vec_iter_s {
 	void (*xpay)(long N, float alpha, float* a, const float* x);
 	void (*axpy)(long N, float* a, float alpha, const float* x);
 	void (*axpbz)(long N, float* out, const float a, const float* x, const float b, const float* z);
+	void (*zmul)(long N, _Complex float* dst, const _Complex float* src1, const _Complex float* src2);
 };
 
 extern const struct vec_iter_s gpu_iter_ops;
@@ -400,6 +402,7 @@ const struct vec_iter_s gpu_iter_ops = {
 	.add = cuda_add,
 	.sub = cuda_sub,
 	.swap = cuda_swap,
+	.zmul = cuda_zmul,
 };
 
 

@@ -19,6 +19,11 @@
 #include <cuda_runtime_api.h>
 #include <cuda.h>
 #include <cuComplex.h>
+#include <thrust/device_vector.h>
+#include <thrust/transform.h>
+#include <thrust/complex.h>
+#include <thrust/sort.h>
+#include <thrust/functional.h>
 
 #include "num/gpukrnls.h"
 
@@ -751,3 +756,63 @@ extern "C" void cuda_min(long N, float* dst, const float* src1, const float* src
 }
 
 
+struct thr_cabs_functor
+{
+    template <typename ValueType>
+    __host__ __device__
+    ValueType operator()(const thrust::complex<ValueType>& z)
+    {
+        return thrust::abs(z);
+    }
+};
+
+__global__ void kern_zhardthresh_mask(long N,  unsigned int k, float thr, cuFloatComplex* d, const cuFloatComplex* x)
+{
+	int start = threadIdx.x + blockDim.x * blockIdx.x;
+	int stride = blockDim.x * gridDim.x;
+
+	for (int i = start; i < N; i += stride) {
+
+		float norm = cuCabsf(x[i]);
+		d[i] = (norm > thr) ? make_cuFloatComplex(1., 0.) : make_cuFloatComplex(0., 0.);
+	}
+}
+
+
+extern "C" void cuda_zhardthresh_mask(long N,  unsigned int k, _Complex float* d, const _Complex float* x)
+{
+	const thrust::device_ptr< const thrust::complex<float> > xvec = thrust::device_pointer_cast((const thrust::complex<float>*)x);
+//	const thrust::device_vector< const thrust::complex<float> > xvec(x, x + N);
+	thrust::device_vector<float> temp(N);
+	thrust::transform(thrust::device, xvec, xvec + N, temp.begin(), thr_cabs_functor() );
+	thrust::sort(temp.begin(), temp.end(), thrust::greater<float>());
+
+	float thr = temp[k];
+	kern_zhardthresh_mask<<<gridsize(N), blocksize(N)>>>(N, k, thr, (cuFloatComplex*)d, (const cuFloatComplex*)x);
+
+}
+
+
+__global__ void kern_zhardthresh(long N,  unsigned int k, float thr, cuFloatComplex* d, const cuFloatComplex* x)
+{
+	int start = threadIdx.x + blockDim.x * blockIdx.x;
+	int stride = blockDim.x * gridDim.x;
+
+	for (int i = start; i < N; i += stride) {
+
+		float norm = cuCabsf(x[i]);
+		d[i] = (norm > thr) ?  x[i] : make_cuFloatComplex(0., 0.);
+	}
+}
+
+extern "C" void cuda_zhardthresh(long N,  unsigned int k, _Complex float* d, const _Complex float* x)
+{
+	const thrust::device_ptr< const thrust::complex<float> > xvec = thrust::device_pointer_cast((const thrust::complex<float>*)x);
+//	const thrust::device_vector< const thrust::complex<float> > xvec(x, x + N);
+	thrust::device_vector<float> temp(N);
+	thrust::transform(thrust::device, xvec, xvec + N, temp.begin(), thr_cabs_functor());
+	thrust::sort(temp.begin(), temp.end(), thrust::greater<float>());
+
+	float thr = temp[k];
+	kern_zhardthresh<<<gridsize(N), blocksize(N)>>>(N, k, thr, (cuFloatComplex*)d, (const cuFloatComplex*)x);
+}
