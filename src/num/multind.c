@@ -660,7 +660,8 @@ void md_copy2(unsigned int D, const long dim[D], const long ostr[D], void* optr,
 	struct data_s data = { size };
 #else
 	struct data_s data = { size, cuda_ondevice(optr) || cuda_ondevice(iptr) };
-#if 1
+//#if 1
+#if 0
 	long tostr[D];
 	long tistr[D];
 	long tdims[D];

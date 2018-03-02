@@ -466,7 +466,7 @@ static void zhardthresh(long N,  unsigned int k, complex float* d, const complex
 static void zhardthresh_mask(long N,  unsigned int k, complex float* d, const complex float* x)
 {
 	float thr = klargest_complex_partsort(N, k, x);
-
+//	debug_printf(DP_INFO,"\ncpu k = %d, threshold: %f\n",k,thr);
 	for (long i = 0; i < N; i++) {
 
 		float norm = cabsf(x[i]);

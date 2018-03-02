@@ -788,6 +788,7 @@ extern "C" void cuda_zhardthresh_mask(long N,  unsigned int k, _Complex float* d
 	thrust::sort(temp.begin(), temp.end(), thrust::greater<float>());
 
 	float thr = temp[k];
+//	printf("\ngpu k = %d, threshold: %f\n",k,thr);
 	kern_zhardthresh_mask<<<gridsize(N), blocksize(N)>>>(N, k, thr, (cuFloatComplex*)d, (const cuFloatComplex*)x);
 
 }
