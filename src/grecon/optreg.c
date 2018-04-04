@@ -306,10 +306,6 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 		case NIHTWAV:
 		{
 			debug_printf(DP_INFO, "NIHT with wavelets regularization: k = %d%% of total elements in each wavelet transform\n", regs[nr].k);
-			/* if (use_gpu){ */
-			/* 	debug_printf(DP_WARN, "GPU operation is not currently implemented for NIHT.\nContinuing with CPU.\n"); */
-			/* 	use_gpu = false; // not implemented, TODO: implement NIHT with gpu */
-			/* } */
 
 			long img_strs[N];
 			md_calc_strides(N, img_strs, img_dims, CFL_SIZE);
@@ -337,7 +333,6 @@ void opt_reg_configure(unsigned int N, const long img_dims[N], struct opt_reg_s*
 			long wav_dims[DIMS];
 			md_copy_dims(DIMS, wav_dims, linop_codomain(trafos[nr])->dims);
 			unsigned int K = (md_calc_size((use_gpu && (!regs[nr].jflags)) ? N : wxdim, wav_dims) / 100) * regs[nr].k;
-			//	unsigned int K = (md_calc_size(wxdim, wav_dims) / 100) * regs[nr].k;
 
 			debug_printf(DP_DEBUG3, "\nK = %d elements will be thresholded per wavelet transform\n", K);
 			debug_printf(DP_DEBUG3, "Total wavelet dimensions: \n[");
