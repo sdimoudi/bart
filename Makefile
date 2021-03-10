@@ -316,11 +316,12 @@ NVCC = $(CUDA_BASE)/bin/nvcc
 
 ifeq ($(CUDA),1)
 CUDA_H := -I$(CUDA_BASE)/include
+CUDA_LPATH ?= $(CUDA_BASE)/lib
 CPPFLAGS += -DUSE_CUDA $(CUDA_H)
 ifeq ($(BUILDTYPE), MacOSX)
-CUDA_L := -L$(CUDA_BASE)/lib -lcufft -lcudart -lcublas -m64 -lstdc++
+CUDA_L := -L$(CUDA_LPATH) -lcufft -lcudart -lcublas -m64 -lstdc++
 else
-CUDA_L := -L$(CUDA_BASE)/lib -lcufft -lcudart -lcublas -lstdc++ -Wl,-rpath $(CUDA_BASE)/lib
+CUDA_L := -L$(CUDA_LPATH) -lcufft -lcudart -lcublas -lstdc++ -Wl,-rpath $(CUDA_LPATH)
 endif
 else
 CUDA_H :=
